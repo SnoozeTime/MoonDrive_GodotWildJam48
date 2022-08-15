@@ -8,12 +8,17 @@ var color = null
 # curvature
 var curve = 0
 
-func _init(n: int, c := 0):
+var clip = null
+
+# sprites (billboards, trees...)
+var sprites = []
+
+func _init(p1_y, p2_y, n: int, c := 0):
 	index = n
 	p1 = RoadPoint.new()
-	p1.world = Vector3(0, 0, n * Settings.SEGMENT_LENGTH)
+	p1.world = Vector3(0, p1_y, n * Settings.SEGMENT_LENGTH)
 	p2 = RoadPoint.new()
-	p2.world = Vector3(0, 0, (n+1) * Settings.SEGMENT_LENGTH)
+	p2.world = Vector3(0, p2_y, (n+1) * Settings.SEGMENT_LENGTH)
 
 	color = Settings.COLORS_LIGHT
 	if int(floor(n/Settings.RUMBLE_LENGTH)) %2 == 0:
@@ -21,9 +26,12 @@ func _init(n: int, c := 0):
 
 	curve = c
 
-func project(camera: Vector3, camera_depth):
-	p1.project(camera, camera_depth)
-	p2.project(camera, camera_depth)
+func add_sprite(sprite, offset):
+	sprites.append({ "sprite": sprite, "offset": offset})
+
+func project(camera: Vector3, camera_depth, x, dx):
+	p1.project(camera-Vector3(x, 0, 0), camera_depth)
+	p2.project(camera-Vector3(x+dx, 0, 0), camera_depth)
 
 func draw(node2d: Node2D):
 
@@ -41,14 +49,9 @@ func draw(node2d: Node2D):
 	Settings.draw_rectangle(node2d, p1.screen.x-p1.screen.z-r1, p1.screen.y, r1, p2.screen.x-p2.screen.z-r2, p2.screen.y, r2, color["rumble"])
 	Settings.draw_rectangle(node2d, p1.screen.x+p1.screen.z+r1, p1.screen.y, r1, p2.screen.x+p2.screen.z+r2, p2.screen.y, r2, color["rumble"])
 
-	if p2.screen.y > 500 and p2.screen.y < 700:
-		print("HERE")
-
 	# The road.
 	Settings.draw_rectangle(node2d, p1.screen.x, p1.screen.y, p1.screen.z, p2.screen.x, p2.screen.y, p2.screen.z, color["road"])
 
-	if p2.screen.y > 0:
-		print("HERE")
 	var lanes = Settings.LANES
 
 	if "lane" in color:

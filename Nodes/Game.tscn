@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Nodes/Game.gd" type="Script" id=1]
 [ext_resource path="res://assets/Background/sky.png" type="Texture" id=2]
@@ -6,17 +6,25 @@
 [ext_resource path="res://assets/Background/trees.png" type="Texture" id=4]
 [ext_resource path="res://assets/Background/player_straight.png" type="Texture" id=5]
 [ext_resource path="res://Nodes/Player.gd" type="Script" id=6]
+[ext_resource path="res://Nodes/Background.gd" type="Script" id=7]
+[ext_resource path="res://assets/Background/billboard02.png" type="Texture" id=8]
 
 [node name="Game" type="Node2D"]
 script = ExtResource( 1 )
+billboard = ExtResource( 8 )
 
 [node name="Background" type="Node2D" parent="."]
 z_index = -1
+script = ExtResource( 7 )
 
 [node name="Sky" type="Sprite" parent="Background"]
-position = Vector2( 518, 233 )
+position = Vector2( 303, 267.642 )
+scale = Vector2( 0.665266, 1.01188 )
 z_index = -1
 texture = ExtResource( 2 )
+offset = Vector2( 17, -33 )
+region_enabled = true
+region_rect = Rect2( -1906.81, -1.74397, 5202.02, 463.756 )
 
 [node name="Hills" type="Sprite" parent="Background"]
 position = Vector2( 516, 405 )
@@ -32,3 +40,12 @@ scale = Vector2( 2.99387, 3.44625 )
 texture = ExtResource( 5 )
 offset = Vector2( 15.6168, -13.1597 )
 script = ExtResource( 6 )
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Label" type="RichTextLabel" parent="HUD"]
+margin_left = 17.0
+margin_top = 20.0
+margin_right = 269.0
+margin_bottom = 243.0
+custom_colors/default_color = Color( 0, 0, 0, 1 )

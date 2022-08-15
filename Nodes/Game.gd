@@ -3,19 +3,16 @@ extends Node2D
 
 
 onready var player = $Player
+onready var background = $Background
+onready var label = $HUD/Label
+
+export var billboard: Texture
+
 
 # https://codeincomplete.com/articles/javascript-racer-v1-straight/
 
-var width = 1024
-var height = 768
-var segments = [] # array of road segments
-
 var fov = 100
-var road_width = 2000 # half-width (-road_witdh to +road_width)
-var segment_length = 200 # length of single segment
 var rumble_length = 3 # number of segments per red/white strip
-var track_length = 0 # To update later - length of entire track
-var lanes         = 3;                      # number of lanes
 var fieldOfView   = 100;                    #/ angle (degrees) for field of view
 var cameraHeight  = 1000;                   # z height of camera
 var cameraDepth   =  1 / tan((fieldOfView/2) * PI/180)                   # z distance camera is from screen (computed)
@@ -23,18 +20,15 @@ var drawDistance  = 300;                    #number of segments to draw
 
 var position_z = 1
 
-var player_x = 0
-var max_speed = segment_length * 60
+var max_speed = Settings.SEGMENT_LENGTH * 60
 var accel = max_speed/5
 var decel = max_speed/5
 var braking = max_speed
 var speed = 0
-# Declare member variables here. Examples:
-# var a = 2
-# var b = "text"
 
-var player_z = cameraHeight*cameraDepth
+var player_position = Vector3(0, 0, cameraHeight*cameraDepth)
 
+var road = Road.new()
 
 const COLORS_LIGHT = {
 	"road": Color("#6B6B6B"),
@@ -53,23 +47,50 @@ const COLORS_DARK = {
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	reset_road()
+	road.reset()
 
+	var pz=24385.002543 + 839.099609
+	print(road.find_segment(pz).index)
+
+
+	# Player segment = 125
+	# 24336.335872 + 839.099609 = 25175.435481
+	# Percent remaining = 0.875
+	#  Lerp between p1.y and p2.y: 1445.918945 and  1500 = 1493.239868
+	# (0, 1493.239868, 839.099609)
+	# Player segment = 125
+	# 24385.002543 + 839.099609 = 25224.102153
+	# Percent remaining = 0.12
+	#  Lerp between p1.y and p2.y: 1445.918945 and  1500 = 1452.408691
+	# (0, 1452.408691, 839.099609)
+	# Player segment = 126
+	# 24433.002548 + 839.099609 = 25272.102158
+	# Percent remaining = 0.36
+	#  Lerp between p1.y and p2.y: 1500 and  1554.739014 = 1519.706055
+	# (0, 1519.706055, 839.099609)
+	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 
+
+	
+	var speed_percent = speed/max_speed
 	# Z position
 	increase_pos(delta)
 
+	var player_segment = road.find_segment(position_z + player_position.z)
+	
 	# X position
 	var dx = delta * 2 * (speed/max_speed)
 	if Input.is_action_pressed("steer_left"):
-		player_x -= dx
+		player_position.x -= dx
 	elif Input.is_action_pressed("steer_right"):
-		player_x += dx
-	player_x = clamp(player_x, -2, 2)
+		player_position.x += dx
+	player_position.x = player_position.x - (dx * speed_percent * player_segment.curve * Settings.CENTRIFUGAL_FORCE)
+	player_position.x = clamp(player_position.x, -2, 2)
 
+	label.text = String(player_position)
 
 	# Update the speed
 	if Input.is_action_pressed("accelerate"):
@@ -80,126 +101,94 @@ func _process(delta):
 		speed -= decel * delta
 	speed = clamp(speed, 0, max_speed)
 	
-	player.camera_scale = cameraDepth / player_z
+	player.camera_scale = cameraDepth / player_position.z
 
+	var player_percent = percent_remaining(position_z+player_position.z, Settings.SEGMENT_LENGTH);
+	player_position.y  = lerp(player_segment.p1.world.y, player_segment.p2.world.y, player_percent);
+
+	label.text += "\nPlayer segment = " + String(player_segment.index)
+	label.text += "\n" + String(position_z) + " + " + String(player_position.z) + " = " + String(position_z+player_position.z)
+	label.text += "\nPercent remaining = " + String(player_percent)
+	label.text += "\n Lerp between p1.y and p2.y: " + String(player_segment.p1.world.y) + " and  " + String(player_segment.p2.world.y) + " = " + String(player_position.y)
+
+	#print(label.text)
+	# 
+	background.adjust_offsets(speed_percent, player_segment.curve)
 	# Draw screen
 	update()
 
 func increase_pos(delta):
 	var res = position_z + delta * speed
 	
-	while res >= track_length:
-		res -= track_length
+	while res >= road.track_length:
+		res -=  road.track_length
 
 	while res < 0:
-		res += track_length
+		res +=  road.track_length
 
 	position_z = res
 
 
-func reset_road():
-
-	segments = []
-
-	for n in range(500):
-		var c = COLORS_LIGHT
-		if int(floor(n/rumble_length)) %2 == 0:
-			c = COLORS_DARK
-
-		segments.append(Segment.new(n))
-		# 	{
-		# 	"index": n,
-		# 	"p1": { "world": Vector3(0, 0, n * segment_length), "screen": Vector3.ZERO, "camera": Vector3.ZERO},
-		# 	"p2": { "world": Vector3(0, 0, (n+1) * segment_length), "screen": Vector3.ZERO, "camera": Vector3.ZERO},
-		# 	"color": c
-		# })
-	track_length = segments.size()*segment_length
-
-
-func add_segment(curve):
-	var n = segments.size()
-	var c = COLORS_LIGHT
-	if int(floor(n/rumble_length)) %2 == 0:
-		c = COLORS_DARK
-	
-	segments.append({
-		"index": n,
-		"p1": { "world": Vector3(0, 0, n * segment_length), "screen": Vector3.ZERO, "camera": Vector3.ZERO},
-		"p2": { "world": Vector3(0, 0, (n+1) * segment_length), "screen": Vector3.ZERO, "camera": Vector3.ZERO},
-		"color": c,
-		"curve": curve
-	})
-
-func find_segment(z):
-	return segments[int(floor(z/segment_length))%segments.size()]
-	
 func _draw():
 
-	var base_segment = find_segment(position_z)
-	var camera_pos = Vector3(player_x * road_width, cameraHeight, position_z)
-	#var maxy = height
+
+	#draw_texture_rect_region(billboard, Rect2(0, 100, 215, 220), Rect2(0, 0, 215, 220))
+
+	var base_segment = road.find_segment(position_z)
+	var base_percent = percent_remaining(position_z, Settings.SEGMENT_LENGTH)
+
+	var x = 0
+	var dx = - (base_segment.curve*base_percent)
+
+	var maxy = Settings.HEIGHT
+	var camera_pos = Vector3((player_position.x * Settings.ROAD_WIDTH), cameraHeight, position_z)
 	for n in range(drawDistance):
 		
-		var segment = segments[(base_segment.index+n) % segments.size()]
-		segment.project(camera_pos, cameraDepth)
+		var segment = road.segments[(base_segment.index+n) % road.segments.size()]
+		
+		segment.project(camera_pos+Vector3(0, player_position.y, 0), cameraDepth, x, dx)
+		segment.clip = null # maxy
 		#project(segment.p1, camera_pos)
 		#project(segment.p2, camera_pos)
 
+		x = x + dx
+		dx = dx + segment.curve
+		
 		# CLIP
-		if segment.p1.camera.z <= cameraDepth: # or segment["p2"]["screen"].z >= maxy:
-			continue
-
+		# behind us or backface cull OR clip by (already rendered) segment
+		if (segment.p1.camera.z <= cameraDepth) or  (segment.p2.screen.y >= segment.p1.screen.y) or	(segment.p2.screen.y >= maxy):
+			  segment.clip = maxy
+			  continue;
+		
+		maxy = segment.p2.screen.y;
 		# Render the segment
 		segment.draw(self)
 
-func project(p, camera: Vector3):
-	p["camera"] = p["world"] - camera
-	var scale = cameraDepth/p["camera"].z
-	p["screen_scale"] = scale
-	p["screen"].x = round( (width/2) + (scale*p["camera"].x * width /2) )
-	p["screen"].y = round( (height/2) - (scale*p["camera"].y * height /2) )
-	# screen.w
-	p["screen"].z = round(scale * road_width * width /2)
+	# Render sprites back to front.
+	for n in range(drawDistance-1, 0, -1):
+		var segment = road.segments[(base_segment.index+n) % road.segments.size()]
+
+		for sprite in segment.sprites:
+			var sprite_scale = segment.p1.screen_scale
+
+			# width = sprite_width * scale * screen
+			var w = 700 * sprite_scale * Settings.WIDTH/2
+			var h = 1000 * sprite_scale * Settings.WIDTH/2
+			
+			#var clip_h = max(0, segment.p1.screen.y+h-segment.clip)
+
+			# var sprite_top_y = segment.p1.screen.y+h
+			# print(h-(segment.clip-segment.p1.screen.y))
+
+			var dest_x = segment.p1.screen.x
+			var dest_y = segment.p1.screen.y + h
+
+			# TODO RENDER OVER HILLS
+			if segment.clip == null:			
+				#Settings.draw_rectangle(self, segment.p1.screen.x, segment.p1.screen.y, w, segment.p2.screen.x, segment.p1.screen.y+h, w, Color.black)
+				draw_texture_rect_region(billboard, Rect2(dest_x, dest_y, w, h), Rect2(0, 0, 215, 220))
 
 
-func draw_segment(segment):
-
-
-	var p1_screen = segment["p1"]["screen"]
-	var p2_screen = segment["p2"]["screen"]
-
-	var r1 = rumble_width(p1_screen.z)
-	var l1 = lane_marker_width(p1_screen.z)
-	var r2 = rumble_width(p2_screen.z)
-	var l2 = lane_marker_width(p2_screen.z)
-
-	# grass
-	Settings.draw_rectangle(self, width/2, p1_screen.y, width/2,width/2, p2_screen.y, width/2, segment["color"]["grass"])
-
-	# Rumble
-	Settings.draw_rectangle(self, p1_screen.x-p1_screen.z-r1, p1_screen.y, r1, p2_screen.x-p2_screen.z-r2, p2_screen.y, r2,segment["color"]["rumble"])
-	Settings.draw_rectangle(self, p1_screen.x+p1_screen.z+r1, p1_screen.y, r1, p2_screen.x+p2_screen.z+r2, p2_screen.y, r2,segment["color"]["rumble"])
-
-	# The road.
-	Settings.draw_rectangle(self, p1_screen.x, p1_screen.y, p1_screen.z, p2_screen.x, p2_screen.y, p2_screen.z, segment["color"]["road"])
-
-	if "lane" in segment["color"]:
-		var lane_w1 = p1_screen.z * 2/lanes
-		var lane_w2 = p2_screen.z * 2/lanes
-
-		# first lane
-		var lane_x1 = p1_screen.x - p1_screen.z + lane_w1
-		var lane_x2 = p2_screen.x - p2_screen.z + lane_w2
-
-		# 3 lanes -> 2 markers
-		for _i in range(1, lanes):
-			Settings.draw_rectangle(self, lane_x1, p1_screen.y, l1, lane_x2, p2_screen.y, l2, segment["color"]["lane"])
-			lane_x1 += lane_w1
-			lane_x2 += lane_w2
-
-
-func rumble_width(projected_road_width: float):
-	return projected_road_width/max(6, 2*lanes)
-
-func lane_marker_width(projected_road_width: float):
-	return projected_road_width/max(32, 8*lanes)
+func percent_remaining(n, total: int):
+	#return segments[int(floor(z/Settings.SEGMENT_LENGTH))%segments.size()]
+	return float(int(round(n))%total)/float(total)
