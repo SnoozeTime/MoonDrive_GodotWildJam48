@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/car_engine_basef.ogg-9d23bc296304fd4001aea4e10683090d.oggstr"
+
+[deps]
+
+source_file="res://assets/Audio/SFX/car_engine_basef.ogg"
+dest_files=[ "res://.import/car_engine_basef.ogg-9d23bc296304fd4001aea4e10683090d.oggstr" ]
+
+[params]
+
+loop=true
+loop_offset=0

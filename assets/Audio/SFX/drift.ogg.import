@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/drift.ogg-2ff32ce2ecbbdaacb58c24038cfd1305.oggstr"
+
+[deps]
+
+source_file="res://assets/Audio/SFX/drift.ogg"
+dest_files=[ "res://.import/drift.ogg-2ff32ce2ecbbdaacb58c24038cfd1305.oggstr" ]
+
+[params]
+
+loop=true
+loop_offset=0

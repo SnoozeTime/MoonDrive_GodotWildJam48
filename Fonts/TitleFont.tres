@@ -1,0 +1,10 @@
+[gd_resource type="DynamicFont" load_steps=2 format=2]
+
+[ext_resource path="res://Fonts/blox-brk.regular.ttf" type="DynamicFontData" id=1]
+
+[resource]
+size = 128
+outline_size = 1
+outline_color = Color( 0.603922, 0.0156863, 0.792157, 1 )
+use_filter = true
+font_data = ExtResource( 1 )

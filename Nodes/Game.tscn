@@ -1,13 +1,39 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=28 format=2]
 
 [ext_resource path="res://Nodes/Game.gd" type="Script" id=1]
 [ext_resource path="res://assets/Background/sky.png" type="Texture" id=2]
-[ext_resource path="res://assets/Background/hills.png" type="Texture" id=3]
+[ext_resource path="res://assets/Background/hills_front.png" type="Texture" id=3]
 [ext_resource path="res://assets/Background/trees.png" type="Texture" id=4]
 [ext_resource path="res://assets/Background/player_straight.png" type="Texture" id=5]
 [ext_resource path="res://Nodes/Player.gd" type="Script" id=6]
 [ext_resource path="res://Nodes/Background.gd" type="Script" id=7]
 [ext_resource path="res://assets/Background/billboard02.png" type="Texture" id=8]
+[ext_resource path="res://Nodes/TextureManager.gd" type="Script" id=9]
+[ext_resource path="res://assets/Background/hills_back.png" type="Texture" id=10]
+[ext_resource path="res://assets/Background/moon.png" type="Texture" id=11]
+[ext_resource path="res://Fonts/BigFont.tres" type="DynamicFont" id=12]
+[ext_resource path="res://Fonts/SmallFont.tres" type="DynamicFont" id=13]
+[ext_resource path="res://Nodes/HUD.gd" type="Script" id=14]
+[ext_resource path="res://Nodes/core/Road.gd" type="Script" id=15]
+[ext_resource path="res://assets/Audio/SFX/car_engine_basef.ogg" type="AudioStream" id=16]
+[ext_resource path="res://assets/Audio/SFX/drift.ogg" type="AudioStream" id=17]
+[ext_resource path="res://assets/Background/sea.png" type="Texture" id=18]
+[ext_resource path="res://Nodes/gui/timer_counter.tscn" type="PackedScene" id=19]
+[ext_resource path="res://Nodes/gui/WinScreen.tscn" type="PackedScene" id=20]
+[ext_resource path="res://Nodes/gui/kilometers_counter.tscn" type="PackedScene" id=21]
+[ext_resource path="res://Nodes/gui/PauseScene.tscn" type="PackedScene" id=22]
+[ext_resource path="res://assets/Audio/SFX/1.ogg" type="AudioStream" id=23]
+[ext_resource path="res://assets/Audio/SFX/go.ogg" type="AudioStream" id=24]
+[ext_resource path="res://assets/Audio/SFX/2.ogg" type="AudioStream" id=25]
+[ext_resource path="res://assets/Audio/SFX/3.ogg" type="AudioStream" id=26]
+
+[sub_resource type="Environment" id=1]
+background_mode = 4
+glow_enabled = true
+glow_intensity = 0.42
+glow_strength = 0.89
+glow_blend_mode = 1
+glow_hdr_threshold = 1.5
 
 [node name="Game" type="Node2D"]
 script = ExtResource( 1 )
@@ -18,23 +44,43 @@ z_index = -1
 script = ExtResource( 7 )
 
 [node name="Sky" type="Sprite" parent="Background"]
-position = Vector2( 303, 267.642 )
-scale = Vector2( 0.665266, 1.01188 )
-z_index = -1
+position = Vector2( 511, 95 )
+scale = Vector2( 4.05591, 3.59306 )
 texture = ExtResource( 2 )
-offset = Vector2( 17, -33 )
+
+[node name="Moon" type="Sprite" parent="Background"]
+modulate = Color( 1.5, 1.5, 1.5, 1 )
+position = Vector2( 551, 260 )
+scale = Vector2( 2.96864, 2.62986 )
+texture = ExtResource( 11 )
+
+[node name="HillsBack" type="Sprite" parent="Background"]
+position = Vector2( 511, 243 )
+scale = Vector2( 2.01667, 2.01667 )
+texture = ExtResource( 10 )
 region_enabled = true
-region_rect = Rect2( -1906.81, -1.74397, 5202.02, 463.756 )
+region_rect = Rect2( 0, 0, 2532.61, 174.008 )
 
 [node name="Hills" type="Sprite" parent="Background"]
-position = Vector2( 516, 405 )
+position = Vector2( 511, 243 )
+scale = Vector2( 2.01667, 2.01667 )
 texture = ExtResource( 3 )
+region_enabled = true
+region_rect = Rect2( 0, 0, 2532.61, 174.008 )
 
 [node name="Trees" type="Sprite" parent="Background"]
+visible = false
 position = Vector2( 515, 409 )
 texture = ExtResource( 4 )
 
+[node name="Sea" type="Sprite" parent="Background"]
+position = Vector2( 512, 418 )
+scale = Vector2( 1.99414, 1.4587 )
+texture = ExtResource( 18 )
+offset = Vector2( 0, 169.329 )
+
 [node name="Player" type="Sprite" parent="."]
+visible = false
 position = Vector2( 461, 740 )
 scale = Vector2( 2.99387, 3.44625 )
 texture = ExtResource( 5 )
@@ -42,10 +88,173 @@ offset = Vector2( 15.6168, -13.1597 )
 script = ExtResource( 6 )
 
 [node name="HUD" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+script = ExtResource( 14 )
 
-[node name="Label" type="RichTextLabel" parent="HUD"]
-margin_left = 17.0
-margin_top = 20.0
-margin_right = 269.0
-margin_bottom = 243.0
-custom_colors/default_color = Color( 0, 0, 0, 1 )
+[node name="kilometers_counter" parent="HUD" instance=ExtResource( 21 )]
+unique_name_in_owner = true
+anchor_top = 1.0
+anchor_right = 0.0
+margin_left = 14.0
+margin_top = -98.0
+margin_right = 1024.0
+size_flags_horizontal = 9
+
+[node name="MarginContainer" type="MarginContainer" parent="HUD"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 10.0
+margin_top = 10.0
+margin_right = -10.0
+margin_bottom = -10.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HUD/MarginContainer"]
+margin_right = 1004.0
+margin_bottom = 748.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/separation = -22
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/MarginContainer/VBoxContainer"]
+margin_right = 1004.0
+margin_bottom = 264.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Padding" type="RichTextLabel" parent="HUD/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+margin_right = 427.0
+margin_bottom = 264.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 7
+custom_constants/shadow_offset_y = 9
+custom_fonts/mono_font = ExtResource( 12 )
+custom_fonts/normal_font = ExtResource( 12 )
+
+[node name="timer_counter" parent="HUD/MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource( 19 )]
+unique_name_in_owner = true
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 431.0
+margin_right = 572.0
+margin_bottom = 264.0
+
+[node name="LapLabel" type="RichTextLabel" parent="HUD/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+margin_left = 576.0
+margin_right = 1004.0
+margin_bottom = 264.0
+grow_horizontal = 0
+size_flags_horizontal = 3
+custom_constants/shadow_offset_x = 7
+custom_constants/shadow_offset_y = 9
+custom_fonts/normal_font = ExtResource( 13 )
+bbcode_enabled = true
+bbcode_text = "[right]lap:[/right]"
+text = "lap:"
+
+[node name="MiddlePanel" type="Panel" parent="HUD/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+self_modulate = Color( 1, 1, 1, 0.419608 )
+margin_top = 242.0
+margin_right = 1004.0
+margin_bottom = 506.0
+size_flags_vertical = 3
+
+[node name="StartLabel" type="RichTextLabel" parent="HUD/MarginContainer/VBoxContainer/MiddlePanel"]
+unique_name_in_owner = true
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 5
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 7
+custom_constants/shadow_offset_y = 9
+custom_fonts/mono_font = ExtResource( 12 )
+custom_fonts/normal_font = ExtResource( 12 )
+bbcode_enabled = true
+fit_content_height = true
+
+[node name="Panel2" type="Panel" parent="HUD/MarginContainer/VBoxContainer"]
+self_modulate = Color( 1, 1, 1, 0 )
+margin_top = 484.0
+margin_right = 1004.0
+margin_bottom = 748.0
+size_flags_vertical = 3
+
+[node name="SpeedLabel" type="Label" parent="HUD/MarginContainer/VBoxContainer/Panel2"]
+unique_name_in_owner = true
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_top = -14.0
+margin_right = 40.0
+grow_vertical = 0
+size_flags_horizontal = 3
+size_flags_vertical = 6
+custom_fonts/font = ExtResource( 13 )
+
+[node name="WinScreen" parent="HUD/MarginContainer" instance=ExtResource( 20 )]
+unique_name_in_owner = true
+visible = false
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_right = 1004.0
+margin_bottom = 748.0
+
+[node name="PauseScene" parent="HUD" instance=ExtResource( 22 )]
+unique_name_in_owner = true
+visible = false
+
+[node name="TextureManager" type="Node" parent="."]
+script = ExtResource( 9 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 1 )
+
+[node name="StartTimer" type="Timer" parent="."]
+wait_time = 3.0
+
+[node name="Road" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource( 15 )
+
+[node name="CheckpointTimer" type="Timer" parent="."]
+
+[node name="CarEngine" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 16 )
+volume_db = -10.0
+bus = "SFX"
+
+[node name="DriftSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 17 )
+volume_db = -15.971
+bus = "SFX"
+
+[node name="three" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 26 )
+volume_db = -5.0
+bus = "SFX"
+
+[node name="two" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 25 )
+volume_db = -5.0
+bus = "SFX"
+
+[node name="one" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 23 )
+volume_db = -5.0
+bus = "SFX"
+
+[node name="go" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 24 )
+volume_db = -5.0
+bus = "SFX"
+
+[connection signal="go_back" from="HUD/MarginContainer/WinScreen" to="." method="_on_WinScreen_go_back"]
+[connection signal="exit_to_menu" from="HUD/PauseScene" to="." method="_on_PauseScene_exit_to_menu"]
+[connection signal="timeout" from="StartTimer" to="." method="_on_StartTimer_timeout"]
+[connection signal="timeout" from="CheckpointTimer" to="." method="_on_CheckpointTimer_timeout"]

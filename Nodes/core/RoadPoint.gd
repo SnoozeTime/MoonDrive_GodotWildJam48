@@ -8,7 +8,7 @@ var screen_scale = 1
 
 func project(camera_pos: Vector3, camera_depth):
 	camera = world - camera_pos
-	var scale = camera_depth/camera.z
+	var scale = camera_depth/(0.01+camera.z)
 	screen_scale = scale
 	var width = Settings.WIDTH
 	var height = Settings.HEIGHT
