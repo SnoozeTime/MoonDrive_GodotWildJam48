@@ -1,0 +1,31 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Fonts/SmallFont.tres" type="DynamicFont" id=1]
+[ext_resource path="res://assets/GUI/GameOver.png" type="Texture" id=2]
+[ext_resource path="res://Nodes/gui/GameOverScreen.gd" type="Script" id=3]
+
+[node name="GameOverScreen" type="CenterContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 3 )
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+margin_left = 152.0
+margin_top = 307.0
+margin_right = 872.0
+margin_bottom = 460.0
+custom_constants/separation = 28
+
+[node name="Congratulation" type="TextureRect" parent="VBoxContainer"]
+unique_name_in_owner = true
+margin_right = 720.0
+margin_bottom = 101.0
+texture = ExtResource( 2 )
+
+[node name="TimeLabel2" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
+margin_top = 129.0
+margin_right = 720.0
+margin_bottom = 153.0
+custom_fonts/font = ExtResource( 1 )
+text = "Press any touch to continue..."

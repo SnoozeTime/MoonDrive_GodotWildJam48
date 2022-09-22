@@ -3,7 +3,7 @@ class_name Road extends Node
 signal checkpoint_over
 signal circuit_over
 
-var total_cars = 200
+var total_cars = 150
 var segments = []
 var track_length = 0
 var cars = []
@@ -27,14 +27,21 @@ func reset(player_pos: float):
 	#
 	add_large_turn(1)
 	add_large_turn(1)
-	
-	checkpoints.append({"time": 120, "index": segments.size()-1, "end": false})
+	checkpoints.append({"time": 30, "index": segments.size()-1, "end": false})
 	# Rolling hills
-	add_medium_rolling_hills(Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_HILL.HIGH)
-	add_medium_rolling_hills(Settings.ROAD_LENGTH.SHORT, Settings.ROAD_HILL.HIGH)
 
+	add_medium_rolling_hills(Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_HILL.HIGH)
+	
+	var bridge1_start = segments.size()-1 
+	add_medium_rolling_hills(Settings.ROAD_LENGTH.SHORT, Settings.ROAD_HILL.HIGH)
+	for i in range(bridge1_start, segments.size()):
+		if i % 10 == 0:
+			segments[i].add_sprite("bridge", 0)
 	#
 	add_large_turn(-1)
+
+
+	var city_start = segments.size()
 	add_large_turn(-1)
 
 
@@ -42,15 +49,30 @@ func reset(player_pos: float):
 	# Add boosts and shit
 	# ---------------------
 	
-	checkpoints.append({"time": 120, "index": segments.size()-1, "end": false})
+	checkpoints.append({"time": 40, "index": segments.size()-1, "end": false})
 	add_straight_road(Settings.ROAD_LENGTH.LONG)
+	add_medium_rolling_hills(Settings.ROAD_LENGTH.SHORT, Settings.ROAD_HILL.HIGH)
 	add_straight_road(Settings.ROAD_LENGTH.LONG)
+	add_large_turn(1)
 	add_straight_road(Settings.ROAD_LENGTH.LONG)
 
+	for i in range(city_start, segments.size()):
+		segments[i].left_side = Segment.SIDE_TYPE.City
+		segments[i].right_side = Segment.SIDE_TYPE.City
+
+		if i % 5 == 0:
+			
+			segments[i].add_sprite("building2", rand_range(-1.5, -6), Vector2(1, 0))
+			segments[i].add_sprite("building2", rand_range(-1.5, -6))
+			segments[i].add_sprite("building2", rand_range(1.5, 6), Vector2(2, 0))
+			segments[i].add_sprite("building2", rand_range(1.5, 6), Vector2(3, 0))
+
+		if i % 100 == 0:
+			segments[i].add_sprite("boost", rand_range(-0.5, 0.5))
 
 	# CITY END
 
-	checkpoints.append({"time": 120, "index": segments.size()-1, "end": false})
+	checkpoints.append({"time": 35, "index": segments.size()-1, "end": false})
 	add_climbing_curves(Settings.ROAD_HILL.LOW)
 	add_large_turn(-1)
 	add_large_turn(1)
@@ -59,13 +81,14 @@ func reset(player_pos: float):
 	# BEACH and see
 	#= ==========================================
 	var beach_start = segments.size()
-	checkpoints.append({"time": 120, "index": segments.size()-1, "end": false})
+	checkpoints.append({"time": 40, "index": segments.size()-1, "end": false})
 	# 20s to reach that checkpoint
-	checkpoints.append({"time": 120, "index": segments.size()-1, "end": false})
 	add_low_rolling_hills(Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_HILL.HIGH)
 	#add_s_curves()
 
 	add_straight_road(Settings.ROAD_LENGTH.LONG)
+	
+	checkpoints.append({"time": 25, "index": segments.size()-1, "end": false})
 	add_straight_road(Settings.ROAD_LENGTH.LONG)
 
 	# TURN
@@ -77,11 +100,15 @@ func reset(player_pos: float):
 		if i % 15 == 0:
 			segments[i].add_sprite("palmtree", -1.3)
 			segments[i].add_sprite("palmtree", 1.3)
+			
+		
+		if i % 100 == 0:
+			segments[i].add_sprite("boost", rand_range(-0.5, 0.5))
 	# ============================================
 
 	# BRIDGE
 	
-	checkpoints.append({"time": 120, "index": segments.size()-1, "end": false})
+	checkpoints.append({"time": 30, "index": segments.size()-1, "end": false})
 	var bridge_start = segments.size()
 	add_straight_road(Settings.ROAD_LENGTH.LONG)
 	add_straight_road(Settings.ROAD_LENGTH.LONG)
@@ -91,18 +118,20 @@ func reset(player_pos: float):
 			segments[i].add_sprite("fence_left", -1.3)
 			segments[i].add_sprite("fence_left", 1.3, Vector2(1, 0))
 
+		if i % 100 == 0:
+			segments[i].add_sprite("boost", rand_range(-0.5, 0.5))
 		segments[i].right_side = Segment.SIDE_TYPE.None
 		segments[i].left_side = Segment.SIDE_TYPE.None
 		segments[i].clamp_x = Vector2(-1, 1)
 
 	# 40s to reach that checkpoint
-	checkpoints.append({"time": 140, "index": segments.size()-1, "end": false})
+	checkpoints.append({"time": 35, "index": segments.size()-1, "end": false})
 	#add_low_rolling_hills(Settings.ROAD_LENGTH.SHORT, Settings.ROAD_HILL.HIGH)
-	add_s_curves()
+	add_s_curves2()
 	# 50s to reach that checkpoint
 	add_more_roads()
 
-	checkpoints.append({"time": 150, "index": segments.size()-1, "end": true})
+	checkpoints.append({"time": 30, "index": segments.size()-1, "end": true})
 	
 
 	# Just to have a nice road at the end.
@@ -113,28 +142,60 @@ func reset(player_pos: float):
 	track_length = segments.size()*Settings.SEGMENT_LENGTH
 
 	start_index = segment_index(player_pos)
-	
-
-	
-	segments[start_index+45].add_sprite("palmtree", -1.3)
-	segments[start_index+45].add_sprite("palmtree", 1.3, Vector2(1, 0))
-	segments[start_index+55].add_sprite("palmtree", -1.3)
-	segments[start_index+55].add_sprite("palmtree", 1.3, Vector2(1, 0))
-	segments[start_index+65].add_sprite("palmtree", -1.3)
-	segments[start_index+65].add_sprite("palmtree", 1.3, Vector2(1, 0))
-
-
-
-	segments[start_index+15].add_sprite("boost", 0)
-	segments[start_index+150].add_sprite("boost", -0.5)
-	segments[start_index+55].add_sprite("boost", 0.8)
-	segments[start_index+305].add_sprite("boost", .5)
-	segments[start_index+315].add_sprite("boost", 0)
 
 	segments[start_index].floor_indication = Color.white
 	for c in checkpoints:
 		segments[c["index"]].floor_indication = Color.aliceblue
-	
+		segments[c["index"]].add_sprite("checkpoint", 0)
+
+		
+	for i in segments.size():
+		if segments[i].left_side == Segment.SIDE_TYPE.None:
+			continue
+		
+		if i % 5 == 0:
+
+			if randf() > 0.7:
+				
+				var offset = sign(rand_range(-1, 1))*rand_range(1.5, 4)
+				if offset != 0:
+				
+					segments[i].add_sprite("bush", offset)
+
+		
+			if randf() > 0.7:
+				var offset = sign(rand_range(-1, 1))*rand_range(1.5, 4)
+				if offset != 0:
+				
+					segments[i].add_sprite("bush", offset)
+				
+			if randf() > 0.7:
+				var offset = sign(rand_range(-1, 1))*rand_range(1.5, 4)
+				if offset != 0:
+				
+					segments[i].add_sprite("bush", offset)
+					
+		if i % 15 == 0:
+
+			if randf() > 0.7:
+				
+				var offset = sign(rand_range(-1, 1))*rand_range(1.5, 4)
+				if offset != 0:
+				
+					segments[i].add_sprite("palmtree", offset)
+
+		
+			if randf() > 0.7:
+				var offset = sign(rand_range(-1, 1))*rand_range(1.5, 4)
+				if offset != 0:
+				
+					segments[i].add_sprite("palmtree", offset)
+				
+			if randf() > 0.7:
+				var offset = sign(rand_range(-1, 1))*rand_range(1.5, 4)
+				if offset != 0:
+				
+					segments[i].add_sprite("palmtree", offset)
 
 func add_segment(curve, y):
 	var n = segments.size()
@@ -146,6 +207,15 @@ func add_s_curves():
 	add_road(Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_CURVE.EASY)
 	add_road(Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, -Settings.ROAD_CURVE.EASY)
 	add_road(Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, -Settings.ROAD_CURVE.MEDIUM)
+
+
+
+func add_s_curves2():
+	add_road(Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, -Settings.ROAD_CURVE.HARD, Settings.ROAD_HILL.HIGH)
+	add_road(0, Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, -Settings.ROAD_CURVE.HARD, Settings.ROAD_HILL.HIGH)
+	add_road(Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_CURVE.EASY, -Settings.ROAD_HILL.LOW)
+	add_road(0, Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, -Settings.ROAD_CURVE.EASY, -Settings.ROAD_HILL.LOW)
+	add_road(Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, -Settings.ROAD_CURVE.MEDIUM, Settings.ROAD_HILL.LOW)
 
 func add_climbing_curves(height):
 	add_road(Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_LENGTH.MEDIUM, Settings.ROAD_CURVE.EASY, height)
@@ -242,15 +312,20 @@ func reset_cars():
 		cars.append(car) 
 
 func on_new_segment(index: int, total_time: float):
+
 	for checkpoint in checkpoints:
 		if checkpoint["index"] == index:
 			if checkpoint["end"]:
 				emit_signal("circuit_over")
 			else:
+
 				checkpoint["completed_in"] = total_time
+				print("Completed checkpoint in " + String(checkpoint["completed_in"]))
 				current_checkpoint +=1
 				emit_signal("checkpoint_over", current_checkpoint-1, total_time)
 			break
+
+		
 
 func get_checkpoint_timeout():
 	return checkpoints[current_checkpoint]["time"]

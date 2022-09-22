@@ -14,6 +14,7 @@ enum SIDE_TYPE {
 	Beach,
 	Water,
 	None,
+	City,
 }
 
 # A color to show on the floor (e.g. start/checkpoint)
@@ -69,12 +70,14 @@ func draw(node2d: Node2D, texture_manager: TextureManager):
 	match left_side:
 		SIDE_TYPE.None: pass
 		SIDE_TYPE.BaseColor: draw_color_left(node2d, color["grass"])
+		SIDE_TYPE.City: draw_color_left(node2d, Color.black)
 		SIDE_TYPE.Beach: 
 			pass # no beach on the left
 
 	match right_side:
 		SIDE_TYPE.None: pass
 		SIDE_TYPE.BaseColor: draw_color_right(node2d, color["grass"])
+		SIDE_TYPE.City: draw_color_right(node2d, Color.black)
 		SIDE_TYPE.Beach: 
 			draw_beach_right(node2d, texture_manager)
 

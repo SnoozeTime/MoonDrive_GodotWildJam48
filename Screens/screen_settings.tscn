@@ -1,0 +1,109 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://Fonts/SmallFont.tres" type="DynamicFont" id=1]
+[ext_resource path="res://Fonts/BigFont.tres" type="DynamicFont" id=2]
+[ext_resource path="res://Screens/screen_settings.gd" type="Script" id=3]
+[ext_resource path="res://assets/Background/bg-Sheet.png" type="Texture" id=5]
+
+[node name="MainScreen" type="Node2D"]
+script = ExtResource( 3 )
+
+[node name="Bg-Sheet" type="Sprite" parent="."]
+position = Vector2( 519, 379 )
+scale = Vector2( 4.53611, 4.53611 )
+texture = ExtResource( 5 )
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+margin_right = 1023.0
+margin_bottom = 771.0
+
+[node name="GridContainer" type="GridContainer" parent="CenterContainer"]
+margin_left = 51.0
+margin_top = 280.0
+margin_right = 971.0
+margin_bottom = 490.0
+custom_constants/vseparation = 49
+columns = 3
+
+[node name="Label" type="Label" parent="CenterContainer/GridContainer"]
+margin_top = 8.0
+margin_right = 336.0
+margin_bottom = 32.0
+custom_fonts/font = ExtResource( 1 )
+text = "Music:"
+
+[node name="MusicSlider" type="HSlider" parent="CenterContainer/GridContainer"]
+unique_name_in_owner = true
+margin_left = 340.0
+margin_right = 840.0
+margin_bottom = 40.0
+rect_min_size = Vector2( 500, 0 )
+size_flags_horizontal = 7
+size_flags_vertical = 7
+value = 100.0
+
+[node name="MusicToggle" type="CheckButton" parent="CenterContainer/GridContainer"]
+margin_left = 844.0
+margin_right = 920.0
+margin_bottom = 40.0
+pressed = true
+
+[node name="Label3" type="Label" parent="CenterContainer/GridContainer"]
+margin_top = 97.0
+margin_right = 336.0
+margin_bottom = 121.0
+custom_fonts/font = ExtResource( 1 )
+text = "SFX:"
+
+[node name="SFXSlider" type="HSlider" parent="CenterContainer/GridContainer"]
+unique_name_in_owner = true
+margin_left = 340.0
+margin_top = 89.0
+margin_right = 840.0
+margin_bottom = 129.0
+rect_min_size = Vector2( 500, 0 )
+size_flags_horizontal = 7
+size_flags_vertical = 7
+value = 100.0
+
+[node name="SFXToggle" type="CheckButton" parent="CenterContainer/GridContainer"]
+margin_left = 844.0
+margin_top = 89.0
+margin_right = 920.0
+margin_bottom = 129.0
+pressed = true
+
+[node name="Label2" type="Label" parent="CenterContainer/GridContainer"]
+margin_top = 182.0
+margin_right = 336.0
+margin_bottom = 206.0
+custom_fonts/font = ExtResource( 1 )
+text = "Retro Screen: "
+
+[node name="ShaderCheckbox" type="CheckBox" parent="CenterContainer/GridContainer"]
+margin_left = 340.0
+margin_top = 178.0
+margin_right = 840.0
+margin_bottom = 210.0
+focus_next = NodePath("../../../BackButton")
+custom_fonts/font = ExtResource( 1 )
+pressed = true
+flat = true
+
+[node name="BackButton" type="Button" parent="."]
+margin_left = 10.0
+margin_top = 10.0
+margin_right = 12.0
+margin_bottom = 20.0
+focus_next = NodePath("../CenterContainer/GridContainer/MusicSlider")
+focus_previous = NodePath("../CenterContainer/GridContainer/ShaderCheckbox")
+custom_fonts/font = ExtResource( 2 )
+text = "Back"
+flat = true
+
+[connection signal="drag_ended" from="CenterContainer/GridContainer/MusicSlider" to="." method="_on_MusicSlider_drag_ended"]
+[connection signal="toggled" from="CenterContainer/GridContainer/MusicToggle" to="." method="_on_MusicToggle_toggled"]
+[connection signal="drag_ended" from="CenterContainer/GridContainer/SFXSlider" to="." method="_on_SFXSlider_drag_ended"]
+[connection signal="toggled" from="CenterContainer/GridContainer/SFXToggle" to="." method="_on_SFXToggle_toggled"]
+[connection signal="toggled" from="CenterContainer/GridContainer/ShaderCheckbox" to="." method="_on_ShaderCheckbox_toggled"]
+[connection signal="pressed" from="BackButton" to="." method="_on_BackButton_pressed"]

@@ -7,10 +7,14 @@ onready var middle_panel: Panel = $"%MiddlePanel"
 onready var speed_label: Label = $"%SpeedLabel"
 onready var km_counter = $"%kilometers_counter"
 onready var win_screen = $"%WinScreen"
+onready var gameover_screen = $"%GameOverScreen"
 onready var pause = $PauseScene
 var lap_start = 0
 var total_time = 0
 
+
+var display_checkpoint = 0 # 2 Seconds
+var current_checkpoint = 0
 var running = false
 
 # Called when the node enters the scene tree for the first time.
@@ -20,7 +24,8 @@ func _ready():
 	middle_panel.hide()
 
 
-func _process(_delta):
+func _process(delta):
+	display_checkpoint -= delta
 	
 	if Input.is_action_just_pressed("Pause"):
 		get_tree().paused = true
@@ -28,10 +33,21 @@ func _process(_delta):
 	
 	if running:
 		total_time = OS.get_unix_time() - lap_start
-		var minutes = total_time / 60
-		var seconds = total_time % 60
-		var str_elapsed = "%02d'%02d''" % [minutes, seconds]
+		var str_elapsed = format_seconds(total_time)
 		lap_label.bbcode_text = "[right]lap: " + str_elapsed + "[/right]"
+		if display_checkpoint>=0:
+			var c = "[color=grey]"
+			if current_checkpoint > 0:
+				c = "[color=red]+"
+			elif current_checkpoint < 0:
+				c = "[color=green]-"
+
+			lap_label.bbcode_text += "\n[right]" + c + format_seconds(abs(current_checkpoint)) + "[/color][/right]"
+
+func format_seconds(t) -> String:
+	var minutes = int(t) / 60
+	var seconds = int(t) % 60
+	return "%02d'%02d''" % [minutes, seconds]
 
 func new_lap():
 	lap_start = OS.get_unix_time()
@@ -62,14 +78,16 @@ func update_checkpoint(sec: float):
 	else:
 		timer_label.set_timer(sec)
 
+func new_checkpoint(diff: float):
+		current_checkpoint = diff
+		display_checkpoint = 2
+
 func game_over():
-	middle_panel.show()
+	middle_panel.hide()
 	timer_label.hide()
 	lap_label.hide()
 	running = false
-	start_label.bbcode_text = "[center]Game Over[/center]"
-	
-	
+	gameover_screen.show_gameover_screen()
 
 func finished():
 	timer_label.hide()

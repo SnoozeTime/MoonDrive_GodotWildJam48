@@ -14,7 +14,10 @@ onready var three_sfx = $three
 onready var two_sfx = $two
 onready var one_sfx = $one
 onready var go_sfx = $go
+onready var crt = $"%CRT"
 
+
+var game_over = false
 
 var sec_until_start = 3
 var has_started = false
@@ -69,6 +72,9 @@ var boost_time = 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	if not Settings.retro_effect:
+		crt.hide()
+
 	ScoreManager.load_from_file()
 	MusicManager.play_level()
 	road.connect("circuit_over", self, "_on_circuit_over")
@@ -158,6 +164,7 @@ func _process(delta):
 		var car_w = texture_manager.get_texture(car.sprite_name).get_width() * texture_manager.sprite_scale
 
 		if speed > car.speed:
+
 			if overlap(player_position.x, texture_manager.player_w, car.offset, car_w, 0.8):
 
 
@@ -198,7 +205,7 @@ func detect_boosters(player_segment):
 			var sprite_w = sprite_obj.get_width() * texture_manager.sprite_scale
 			var sprite_x = sprite["offset"]
 
-			if overlap(player_position.x, texture_manager.player_w, sprite_x, sprite_w, 1.5):
+			if overlap(player_position.x, texture_manager.player_w, sprite_x, sprite_w, 1.0):
 				if sprite_obj.should_boost() and boost_time <= 0:
 					boost_time = 1
 					speed *= boost_quantity
@@ -338,7 +345,7 @@ func _draw():
 			var car_x = lerp(segment.p1.screen.x, segment.p2.screen.x, car.percent) + car.offset * car_scale * Settings.ROAD_WIDTH * Settings.WIDTH/2
 			var car_y = lerp(segment.p1.screen.y, segment.p2.screen.y, car.percent);
 			
-			draw_sprite(car.sprite_name, Vector2(car_x, car_y), car_scale, segment.clip, Vector2.ZERO)
+			draw_sprite(car.sprite_name, Vector2(car_x, car_y), car_scale, segment.clip, Vector2(car.sprite_coords_x,0))
 
 	draw_player(player_segment)
 
@@ -422,32 +429,33 @@ func _on_StartTimer_timeout():
 		checkpoint_timer.start(1)
 
 func _on_circuit_over():
-	checkpoint_timer.stop()
-	has_started = false
-	checkpoint_timer.stop()
+	if not game_over:
+		checkpoint_timer.stop()
+		has_started = false
+		checkpoint_timer.stop()
 
-	var TW = get_tree().create_tween()
-	TW.tween_property(engine, "volume_db", -60.0, .5)
-	TW.tween_interval(1.5)
-	#TW.tween_callback(engine, "set_playing", [false])
-	TW.tween_property(engine, "playing", false, 0)
-	
-	var score = Score.new()
-	score.checkpoints = []
-	score.total_time = hud.total_time
-	for i in range(road.checkpoints.size()):
-		if "completed_in" in road.checkpoints[i]:
-			score.checkpoints.append(road.checkpoints[i]["completed_in"])
-			print("Checkpoint " + String(i) + " completed in " + String(road.checkpoints[i]["completed_in"]))
-	ScoreManager.save_new_score(score)
+		var TW = get_tree().create_tween()
+		TW.tween_property(engine, "volume_db", -60.0, .5)
+		TW.tween_interval(1.5)
+		#TW.tween_callback(engine, "set_playing", [false])
+		TW.tween_property(engine, "playing", false, 0)
+		
+		var score = Score.new()
+		score.checkpoints = []
+		score.total_time = hud.total_time
+		for i in range(road.checkpoints.size()):
+			if "completed_in" in road.checkpoints[i]:
+				score.checkpoints.append(road.checkpoints[i]["completed_in"])
+				print("Checkpoint " + String(i) + " completed in " + String(road.checkpoints[i]["completed_in"]))
+		ScoreManager.save_new_score(score)
 
-	hud.finished()
+		hud.finished()
 
 func _on_checkpoint_over(previous_index, time_to_checkpoint):
 	# display difference of time
-	print(ScoreManager.get_checkpoint_diff(previous_index, time_to_checkpoint))
-	#
 	current_checkpoint_remaining = road.get_checkpoint_timeout()
+	
+	hud.new_checkpoint(ScoreManager.get_checkpoint_diff(previous_index, time_to_checkpoint))
 	hud.update_checkpoint(current_checkpoint_remaining)
 
 func _on_CheckpointTimer_timeout():
@@ -455,6 +463,7 @@ func _on_CheckpointTimer_timeout():
 
 	if current_checkpoint_remaining == 0:
 		hud.game_over()
+		game_over = true
 		has_started = false
 
 	hud.update_checkpoint(current_checkpoint_remaining)
@@ -477,5 +486,11 @@ func _on_PauseScene_exit_to_menu():
 	Transition.change_scene("res://Screens/screen_main.tscn")
 
 func _on_WinScreen_go_back():
+	hud.hide()
+	Transition.change_scene("res://Screens/screen_main.tscn")
+
+
+
+func _on_GameOverScreen_go_back():
 	hud.hide()
 	Transition.change_scene("res://Screens/screen_main.tscn")

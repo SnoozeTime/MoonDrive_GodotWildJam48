@@ -16,14 +16,17 @@ var toggle_timeout = 1
 
 func show_win_screen(score, best):
 	show()
-	var minutes = score / 60
-	var seconds = score % 60
-	var str_elapsed = "%02d'%02d''" % [minutes, seconds]
-
-	time_label.text = "Time: " + str_elapsed
+	time_label.text = "Time: " + format_time(score)
 	if not best:
+		if ScoreManager.current_best != null:
+			time_label.text += " / Best score: " + format_time(ScoreManager.current_best.total_time)
 		best_label.modulate.a = 0
 	finished = true
+
+func format_time(score):
+	var minutes = score / 60
+	var seconds = score % 60
+	return "%02d'%02d''" % [minutes, seconds]
 
 func _process(delta):
 	toggle_timeout -= delta

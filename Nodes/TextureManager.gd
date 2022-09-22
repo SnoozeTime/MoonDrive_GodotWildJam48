@@ -29,7 +29,8 @@ func get_texture(name: String) -> MySprite:
 func load_level1():
 	dict["billboard_02"] = MySprite.new(load("res://assets/Background/billboard02.png"), 1, 1)
 
-	dict["car01"] = MySprite.new(load("res://assets/Background/car01.png"), 1, 1)
+	dict["car02"] = MySprite.new(load("res://assets/Background/car2.png"), 1, 2)
+	dict["car03"] = MySprite.new(load("res://assets/Background/car3.png"), 1, 1)
 	dict["beach_right"] = MySprite.new(load("res://assets/Road/beach_right.png"), 1, 1)
 
 	dict["boost"] = MySprite.new(load("res://assets/Background/boost.png"), 1, 4)
@@ -42,3 +43,14 @@ func load_level1():
 
 	dict["palmtree"] =  MySprite.new(load("res://assets/Road/palmtree.png"), 1, 1)
 	dict["palmtree"].collider_width = 40
+
+	dict["bush"] =  MySprite.new(load("res://assets/Background/bush.png"), 1, 1)
+	dict["building1"] =  MySprite.new(load("res://assets/Road/building1.png"), 1, 1)
+
+	dict["building2"] =  MySprite.new(load("res://assets/Road/building2.png"), 1, 4)
+
+	dict["checkpoint"] = MySprite.new(load("res://assets/Background/checkpoint.png"), 1, 1)
+	dict["checkpoint"].collision = false
+	dict["bridge"] = MySprite.new(load("res://assets/Background/bridge.png"), 1, 1)
+	dict["bridge"].collision = false
+	dict["bridge"].modulate = Color(1.8, 1.8, 1.8, 1.0)

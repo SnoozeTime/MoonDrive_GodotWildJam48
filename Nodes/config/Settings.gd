@@ -13,6 +13,8 @@ const HEIGHT = 768
 const LANES = 3
 const ROAD_WIDTH = 2000 
 
+var retro_effect = true
+
 # When turning
 const CENTRIFUGAL_FORCE = 0.3
 
